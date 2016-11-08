@@ -7,8 +7,8 @@ import numpy as np
 # Load up the dataset, setting correct header labels.
 #
 # .. your code here ..
-
-
+names = ['education', 'age', 'capital-gain', 'race', 'capital-loss', 'hours-per-week', 'sex', 'classification']
+df = pd.read_csv('c:/Data/Projektit/DAT210x/Module2/Datasets/census.data', names=names, na_values="?")
 
 #
 # TODO:
@@ -24,7 +24,8 @@ import numpy as np
 # na_values when loading the dataframe.
 #
 # .. your code here ..
-
+df.dtypes
+df["capital-gain"].unique()
 
 
 #
@@ -39,13 +40,36 @@ import numpy as np
 # for these somewhat ambigious features?
 #
 # .. your code here ..
+ordered_education= ["Preschool"
+    ,"1st-4th"
+    ,"5th-6th"
+    ,"7th-8th"
+    ,"9th"
+    ,"10th"
+    ,"11th"
+    ,"12th"
+    ,"HS-grad"
+    ,"Some-college"
+    ,"Bachelors"
+    ,"Masters"
+    ,"Doctorate"]
+df.education = df.education.astype("category",
+                                  ordered=True,
+                                  categories=ordered_education
+                                  ).cat.codes
 
+df.classification = df.classification.astype("category",
+                                             ordered=True,
+                                             categories=['<=50K','>50K']
+                                            ).cat.codes
 
-
+df_sex = pd.get_dummies(df['sex'])
+df_new = df.join(df_sex)
+                                             
 #
 # TODO:
 # Print out your dataframe
 #
 # .. your code here ..
 
-
+print df.describe()
