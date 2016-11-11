@@ -4,12 +4,13 @@ import matplotlib
 import assignment2_helper as helper
 from sklearn.decomposition import PCA
 
+
 # Look pretty...
 matplotlib.style.use('ggplot')
 
 
 # Do * NOT * alter this line, until instructed!
-scaleFeatures = False
+scaleFeatures = True
 
 
 # TODO: Load up the dataset and remove any and all
