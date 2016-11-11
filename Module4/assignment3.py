@@ -27,28 +27,16 @@ df.dropna(axis=0, inplace=True)
 # You're only labeling by color so you can see the effects of PCA
 labels = ['red' if i=='ckd' else 'green' for i in df.classification]
 
+# Drop all nominal features
+dfNumbers = df.drop(['classification', 'rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane'], axis=1)
+dfNumbers=dfNumbers.apply(pd.to_numeric)
 
-# TODO: Use an indexer to select only the following columns:
-#       ['bgr','wc','rc']
-#
-# .. your code here ..
+df.drop(dfNumbers.columns, axis=1, inplace=True)
+df.drop(['classification'], axis=1, inplace=True)
 
-df=df[['bgr','wc','rc']]
+dfNominalDummies = pd.get_dummies(df, columns=['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane'])
+df=dfNumbers.join(dfNominalDummies)
 
-
-# TODO: Print out and check your dataframe's dtypes. You'll probably
-# want to call 'exit()' after you print it out so you can stop the
-# program's execution.
-#
-# You can either take a look at the dataset webpage in the attribute info
-# section: https://archive.ics.uci.edu/ml/datasets/Chronic_Kidney_Disease
-# or you can actually peek through the dataframe by printing a few rows.
-# What kind of data type should these three columns be? If Pandas didn't
-# properly detect and convert them to that data type for you, then use
-# an appropriate command to coerce these features into the right type.
-#
-# .. your code here ..
-df[['bgr','wc','rc']]=df[['bgr','wc','rc']].apply(pd.to_numeric)
 
 
 # TODO: PCA Operates based on variance. The variable with the greatest
