@@ -39,12 +39,9 @@ colors = []
 for filename in os.listdir(path1):
     #img = misc.imread(path+"//"+filename).reshape(-1)
     samples.append(misc.imread(path1+"//"+filename).reshape(-1))
+    
     colors.append("b")
     
-
-
-
-
 #
 # TODO: Once you're done answering the first three questions,
 # right before you converted your list to a dataframe, add in
@@ -93,8 +90,6 @@ figure.add_subplot("211").scatter(transformedIsomap[:,0], transformedIsomap[:,1]
 # .. your code here .. 
 
 figure.add_subplot("212", projection="3d").scatter(transformedIsomap[:,0], transformedIsomap[:,1], transformedIsomap[:,2], c=colors )
-
-
 
 plt.show()
 
