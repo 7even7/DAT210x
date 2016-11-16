@@ -4,6 +4,8 @@ from scipy import misc
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
 import matplotlib.pyplot as plt
+import os
+from sklearn.manifold import Isomap
 
 # Look pretty...
 matplotlib.style.use('ggplot')
@@ -28,6 +30,19 @@ matplotlib.style.use('ggplot')
 # effect on the algorithm's results.
 #
 # .. your code here .. 
+path1 = "C:/Data/Projektit/DAT210x/Module4/Datasets/ALOI/32"
+path2 = "C:/Data/Projektit/DAT210x/Module4/Datasets/ALOI/32i"
+samples = []
+colors = []
+
+
+for filename in os.listdir(path1):
+    #img = misc.imread(path+"//"+filename).reshape(-1)
+    samples.append(misc.imread(path1+"//"+filename).reshape(-1))
+    colors.append("b")
+    
+
+
 
 
 #
@@ -39,21 +54,25 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
+    
+for filename in os.listdir(path2):
+    samples.append(misc.imread(path2+"//"+filename).reshape(-1))
+    colors.append("r")
 
 #
 # TODO: Convert the list to a dataframe
 #
 # .. your code here .. 
 
-
+df = pd.DataFrame(samples)
 
 #
 # TODO: Implement Isomap here. Reduce the dataframe df down
 # to three components, using K=6 for your neighborhood size
 #
 # .. your code here .. 
-
-
+transformedIsomap = Isomap(n_neighbors=6, n_components=3 )
+transformedIsomap = transformedIsomap.fit_transform(df)
 
 #
 # TODO: Create a 2D Scatter plot to graph your manifold. You
@@ -62,6 +81,8 @@ matplotlib.style.use('ggplot')
 #
 # .. your code here .. 
 
+figure = plt.figure()
+figure.add_subplot("211").scatter(transformedIsomap[:,0], transformedIsomap[:,1], c=colors)
 
 
 
@@ -70,6 +91,8 @@ matplotlib.style.use('ggplot')
 # can use either 'o' or '.' as your marker:
 #
 # .. your code here .. 
+
+figure.add_subplot("212", projection="3d").scatter(transformedIsomap[:,0], transformedIsomap[:,1], transformedIsomap[:,2], c=colors )
 
 
 
