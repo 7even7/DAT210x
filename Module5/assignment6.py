@@ -2,9 +2,13 @@ import random, math
 import pandas as pd
 import numpy as np
 import scipy.io
-
+import matplotlib
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
+from sklearn.manifold import Isomap
+from sklearn.neighbors import KNeighborsClassifier
 
 # If you'd like to try this lab with PCA instead of Isomap,
 # as the dimensionality reduction technique:
@@ -98,6 +102,14 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # instead of sideways. This was demonstrated in the M4/A4 code:
 #
 # .. your code here ..
+mat = scipy.io.loadmat('C:/Data/Projektit/DAT210x/Module4/Datasets/face_data.mat')
+df = pd.DataFrame(mat['images']).T
+num_images, num_pixels = df.shape
+num_pixels = int(math.sqrt(num_pixels))
+
+# Rotate the pictures, so we don't have to crane our necks:
+for i in range(num_images):
+  df.loc[i,:] = df.loc[i,:].reshape(num_pixels, num_pixels).T.reshape(-1)
 
 
 #
@@ -109,7 +121,8 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # loaded it correctly
 #
 # .. your code here ..
-
+labels = pd.read_csv('Datasets/face_labels.csv', header=None)
+face_labels=labels.ix[:,0]
 
 #
 # TODO: Do train_test_split. Use the same code as on the EdX platform in the
@@ -122,7 +135,7 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 #
 # .. your code here ..
 
-
+trainingData, testData, label_train, label_test = train_test_split(df, face_labels, random_state=7, test_size=0.10)
 
 if Test_PCA:
   # INFO: PCA is used *before* KNeighbors to simplify your high dimensionality
@@ -144,6 +157,9 @@ if Test_PCA:
   # data_train, and data_test.
   #
   # .. your code here ..
+  pca_model = PCA(n_components=2).fit(trainingData)
+  data_train = pca_model.transform(trainingData)
+  data_test = pca_model.transform(testData)
 
 else:
   # INFO: Isomap is used *before* KNeighbors to simplify your high dimensionality
@@ -166,6 +182,9 @@ else:
   # data_train, and data_test.
   #
   # .. your code here ..
+  isomap_model = Isomap(n_components=2).fit(trainingData)
+  data_train= isomap_model.transform(trainingData)
+  data_test = isomap_model.transform(testData)
 
 
 
@@ -178,7 +197,8 @@ else:
 # labels that those 2d representations should be.
 #
 # .. your code here ..
-
+naapureita = 20
+model = KNeighborsClassifier(n_neighbors=naapureita).fit(data_train, label_train)
 # NOTE: K-NEIGHBORS DOES NOT CARE WHAT THE ANSWERS SHOULD BE! In fact, it
 # just tosses that information away. All KNeighbors cares about storing is
 # your training data (data_train) so that later on when you attempt to
@@ -191,7 +211,7 @@ else:
 # label_test).
 #
 # .. your code here ..
-
+print model.score(data_test, label_test)
 
 
 # Chart the combined decision boundary, the training data as 2D plots, and

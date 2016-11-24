@@ -1,7 +1,10 @@
+from _ast import In
+
 import pandas as pd
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.cluster import KMeans
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -37,7 +40,7 @@ def clusterWithFewestSamples(model):
   return (model.labels_==minCluster)
 
 
-def doKMeans(data, clusters=0):
+def doKMeans(data, clusters):
   #
   # TODO: Be sure to only feed in Lat and Lon coordinates to the KMeans algo, since none of the other
   # data is suitable for your purposes. Since both Lat and Lon are (approximately) on the same scale,
@@ -47,7 +50,10 @@ def doKMeans(data, clusters=0):
   # Hint: Make sure you fit ONLY the coordinates, and in the CORRECT order (lat first).
   # This is part of your domain expertise.
   #
-  # .. your code here ..
+  location = data[['TowerLat', 'TowerLon']]
+  model = KMeans(n_clusters=clusters).fit(location)
+  print model.cluster_centers_
+  plt.scatter(model.cluster_centers_[:,1],model.cluster_centers_[:,0], c='r', s=100, label='KMean location')
   return model
 
 
@@ -56,9 +62,9 @@ def doKMeans(data, clusters=0):
 # TODO: Load up the dataset and take a peek at its head and dtypes.
 # Convert the date using pd.to_datetime, and the time using pd.to_timedelta
 #
-# .. your code here ..
-
-
+df = pd.read_csv('C:\Data\Projektit\DAT210x\Module5\Datasets\CDR.csv')
+df['CallDate'] = df['CallDate'].apply(pd.to_datetime)
+df['CallTime'] = df['CallTime'].apply(pd.to_timedelta)
 
 
 
@@ -68,7 +74,7 @@ def doKMeans(data, clusters=0):
 # Hint: https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html
 #
 # .. your code here ..
-
+phoneNumbers=df['In'].unique().tolist()
 
 #
 # INFO: The locations map above should be too "busy" to really wrap your head around. This
@@ -86,22 +92,20 @@ def doKMeans(data, clusters=0):
 #   2. They probably are at home in the early morning and during the late night
 #   3. They probably spend time commuting between work and home everyday
 
-
-
-
 print "\n\nExamining person: ", 0
 # 
 # TODO: Create a slice called user1 that filters to only include dataset records where the
 # "In" feature (user phone number) is equal to the first number on your unique list above
 #
 # .. your code here ..
-
-
+user1=df[df['In'] == phoneNumbers[7]]
+plt.scatter(user1.TowerLon, user1.TowerLat, c='gray', label='all samples')
 #
 # TODO: Alter your slice so that it includes only Weekday (Mon-Fri) values.
 #
 # .. your code here ..
-
+weekdays = ['Mon', 'Tue', 'Wed', 'Thr', 'Fri']
+user1 = user1[user1['DOW'].isin(weekdays)]
 
 #
 # TODO: The idea is that the call was placed before 5pm. From Midnight-730a, the user is
@@ -110,14 +114,14 @@ print "\n\nExamining person: ", 0
 # So the assumption is that most of the time is spent either at work, or in 2nd, at home.
 #
 # .. your code here ..
-
+user1 = user1[user1['CallTime']<'17:00:00']
 
 #
 # TODO: Plot the Cell Towers the user connected to
 #
 # .. your code here ..
-
-
+#user1.plot.scatter(x='TowerLon', y='TowerLat', c='gray', alpha=0.1, title='Call Locations')
+plt.scatter(user1.TowerLon, user1.TowerLat, c='b', label = 'before 17:00')
 
 #
 # INFO: Run K-Means with K=3 or K=4. There really should only be a two areas of concentration. If you
@@ -138,12 +142,15 @@ model = doKMeans(user1, 3)
 midWayClusterIndices = clusterWithFewestSamples(model)
 midWaySamples = user1[midWayClusterIndices]
 print "    Its Waypoint Time: ", midWaySamples.CallTime.mean()
-
+clusterInfo(model)
 
 #
 # Let's visualize the results!
 # First draw the X's for the clusters:
-ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
+#fig = plt.figure(2)
+#ax = fig.add_subplot(111)
+plt.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
 #
 # Then save the results:
-showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed
+#showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed
+plt.legend()

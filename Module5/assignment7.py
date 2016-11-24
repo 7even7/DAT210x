@@ -1,5 +1,12 @@
 # If you'd like to try this lab with PCA instead of Isomap,
 # as the dimensionality reduction technique:
+import pandas
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MaxAbsScaler, MinMaxScaler, StandardScaler, Normalizer, RobustScaler
+from sklearn.decomposition import PCA
+from sklearn.manifold import Isomap
+from sklearn.neighbors import KNeighborsClassifier
+
 Test_PCA = True
 
 
@@ -58,8 +65,8 @@ def plotDecisionBoundary(model, X, y):
 # Be sure to verify the rows line up by looking at the file in a text editor.
 #
 # .. your code here ..
-
-
+df = pandas.read_csv('Datasets/breast-cancer-wisconsin.data', header=None,na_values='?')
+df.columns = ['sample', 'thickness', 'size', 'shape', 'adhesion', 'epithelial', 'nuclei', 'chromatin', 'nucleoli', 'mitoses', 'status']
 
 # 
 # TODO: Copy out the status column into a slice, then drop it from the main
@@ -68,7 +75,8 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
+status = df[['status']]
+df.drop(['status', 'sample'], axis=1, inplace=True)
 
 #
 # TODO: With the labels safely extracted from the dataset, replace any nan values
@@ -76,6 +84,7 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+df.fillna(df.mean(), inplace=True)
 
 
 #
@@ -84,7 +93,7 @@ def plotDecisionBoundary(model, X, y):
 # the test_size at 0.5 (50%).
 #
 # .. your code here ..
-
+trainingData, testingData, trainingLabels, testingLabels = train_test_split(df, status, random_state=7, test_size=0.5)
 
 
 
@@ -95,8 +104,19 @@ def plotDecisionBoundary(model, X, y):
 # of the dataset, post transformation.
 #
 # .. your code here ..
+#MaxAbsScaler(), MinMaxScaler(), StandardScaler(), Normalizer(), RobustScaler()
 
+#scaler = MaxAbsScaler().fit(trainingData) #0.957142857143
+#scaler = MinMaxScaler().fit(trainingData) #0.954285714286
+#scaler = StandardScaler().fit(trainingData) #0.948571428571, PCA:0.957142857143, k5:0.957142857143
+#scaler = Normalizer().fit(trainingData) #0.831428571429
+#scaler = RobustScaler().fit(trainingData)#0.945714285714
 
+#scaledTrainingData =scaler.transform(trainingData)
+#scaledTestingData =scaler.transform(testingData)
+
+scaledTrainingData =trainingData
+scaledTestingData =testingData
 
 
 #
@@ -109,6 +129,7 @@ if Test_PCA:
   # You should reduce down to two dimensions.
   #
   # .. your code here ..
+  model = PCA(n_components=2).fit(scaledTrainingData)
 
   
 
@@ -120,6 +141,7 @@ else:
   # You should reduce down to two dimensions.
   #
   # .. your code here ..
+  model = Isomap(n_components=2, n_neighbors=5).fit(scaledTrainingData)
   
 
 
@@ -130,8 +152,8 @@ else:
 # back into the variables themselves.
 #
 # .. your code here ..
-
-
+data_train = model.transform(scaledTrainingData)
+data_test = model.transform(scaledTestingData)
 
 # 
 # TODO: Implement and train KNeighborsClassifier on your projected 2D
@@ -142,6 +164,12 @@ else:
 # parameter affects the results.
 #
 # .. your code here ..
+for k in range(2,10):
+    knmodel = KNeighborsClassifier(n_neighbors=k, weights='distance').fit(data_train, trainingLabels.values.ravel())
+    X_test = data_test
+    y_test = testingLabels
+    print "score with k-value: " + str(k) + " is: "+ str(knmodel.score(data_test,testingLabels))
+    plotDecisionBoundary(knmodel, X_test, y_test)
 
 
 
@@ -161,6 +189,7 @@ else:
 # TODO: Calculate + Print the accuracy of the testing set
 #
 # .. your code here ..
-
-
-plotDecisionBoundary(knmodel, X_test, y_test)
+#X_test = data_test
+#y_test = testingLabels
+#print knmodel.score(data_test,testingLabels)
+#plotDecisionBoundary(knmodel, X_test, y_test)

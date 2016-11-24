@@ -2,15 +2,15 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.cluster import KMeans
 
-matplotlib.style.use('ggplot') # Look Pretty
+matplotlib.style.use('ggplot')  # Look Pretty
+
 
 def showandtell(title=None):
-  if title != None: plt.savefig(title + ".png", bbox_inches='tight', dpi=300)
-  plt.show()
-  exit()
-
-
+	if title != None: plt.savefig(title + ".png", bbox_inches='tight', dpi=300)
+	plt.show()
+	exit()
 
 
 #
@@ -23,7 +23,9 @@ def showandtell(title=None):
 # Convert the date using pd.to_datetime, and the time using pd.to_timedelta
 #
 # .. your code here ..
-
+df = pd.read_csv('C:\Data\Projektit\DAT210x\Module5\Datasets\CDR.csv')
+df['CallDate'] = df['CallDate'].apply(pd.to_datetime)
+df['CallTime'] = df['CallTime'].apply(pd.to_timedelta)
 
 #
 # TODO: Get a distinct list of "In" phone numbers (users) and store the values in a
@@ -31,18 +33,18 @@ def showandtell(title=None):
 # Hint: https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html
 #
 # .. your code here ..
-
+inboundNumbers = df['In'].unique().tolist()
 
 # 
 # TODO: Create a slice called user1 that filters to only include dataset records where the
 # "In" feature (user phone number) is equal to the first number on your unique list above
 #
 # .. your code here ..
-
+user1 = df[df['In'] == inboundNumbers[0]]
 
 # INFO: Plot all the call locations
 user1.plot.scatter(x='TowerLon', y='TowerLat', c='gray', alpha=0.1, title='Call Locations')
-showandtell()  # Comment this line out when you're ready to proceed
+# showandtell()  # Comment this line out when you're ready to proceed
 
 
 #
@@ -68,7 +70,7 @@ showandtell()  # Comment this line out when you're ready to proceed
 # only examining records that came in on weekends (sat/sun).
 #
 # .. your code here ..
-
+user1 = user1[(user1['DOW'] == 'Sat') | (user1['DOW'] == 'Sun')]
 
 #
 # TODO: Further filter it down for calls that are came in either before 6AM OR after 10pm (22:00:00).
@@ -79,8 +81,7 @@ showandtell()  # Comment this line out when you're ready to proceed
 # slice, print out its length:
 #
 # .. your code here ..
-
-
+user1 = user1[(user1['CallTime'] < '06:00:00') | (user1['CallTime'] > '22:00:00')]
 #
 # INFO: Visualize the dataframe with a scatter plot as a sanity check. Since you're familiar
 # with maps, you know well that your X-Coordinate should be Longitude, and your Y coordinate
@@ -91,13 +92,12 @@ showandtell()  # Comment this line out when you're ready to proceed
 # phone tower position data; but considering the below are for Calls that arrived in the twilight
 # hours of weekends, it's likely that wherever they are bunched up is probably near where the
 # caller's residence:
-fig = plt.figure()
+fig = plt.figure(1)
 ax = fig.add_subplot(111)
-ax.scatter(user1.TowerLon,user1.TowerLat, c='g', marker='o', alpha=0.2)
+# ax.axis([-97.1,-96.65,32.7,33])
+ax.scatter(user1.TowerLon, user1.TowerLat, c='g', marker='o', alpha=0.2)
 ax.set_title('Weekend Calls (<6am or >10p)')
-showandtell()  # TODO: Comment this line out when you're ready to proceed
-
-
+# showandtell()  # TODO: Comment this line out when you're ready to proceed
 
 #
 # TODO: Run K-Means with a K=1. There really should only be a single area of concentration. If you
@@ -114,15 +114,25 @@ showandtell()  # TODO: Comment this line out when you're ready to proceed
 # Hint: Make sure you graph the CORRECT coordinates. This is part of your domain expertise.
 #
 # .. your code here ..
+user1Isomap = KMeans(n_clusters=1).fit(user1[['TowerLat', 'TowerLon']])
+ax.scatter(user1Isomap.cluster_centers_[0][1], user1Isomap.cluster_centers_[0][0], c='r', marker='^')
+print user1Isomap.cluster_centers_
 
-
-showandtell()  # TODO: Comment this line out when you're ready to proceed
-
-
+# showandtell()  # TODO: Comment this line out when you're ready to proceed
 
 #
 # TODO: Repeat the above steps for all 10 individuals, being sure to record their approximate home
 # locations. You might want to use a for-loop, unless you enjoy typing.
 #
 # .. your code here ..
+plt.figure(2)
+filteredDataframe = df[(df['DOW'] == 'Sat') | (df['DOW'] == 'Sun')]
+filteredDataframe = filteredDataframe[
+	(filteredDataframe['CallTime'] < '06:00:00') | (filteredDataframe['CallTime'] > '22:00:00')]
 
+for number in inboundNumbers:
+	userData = filteredDataframe[filteredDataframe['In'] == number]
+	userKmeans = KMeans(n_clusters=1).fit(userData[['TowerLat', 'TowerLon']])
+	plt.scatter(userKmeans.cluster_centers_[0][1], userKmeans.cluster_centers_[0][0] )
+
+plt.show()

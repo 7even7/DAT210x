@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
-
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -54,13 +54,14 @@ def doPCA(data, dimensions=2):
   return model
 
 
-def doKMeans(data, clusters=0):
+def doKMeans(data, clusters):
   #
   # TODO: Do the KMeans clustering here, passing in the # of clusters parameter
   # and fit it against your data. Then, return a tuple containing the cluster
   # centers and the labels
   #
   # .. your code here ..
+  model = KMeans(n_clusters=clusters).fit(data)
   return model.cluster_centers_, model.labels_
 
 
@@ -72,6 +73,7 @@ def doKMeans(data, clusters=0):
 #
 # .. your code here ..
 
+df = pd.read_csv('C:\Data\Projektit\DAT210x\Module5\Datasets\Wholesale customers data.csv')
 #
 # TODO: As instructed, get rid of the 'Channel' and 'Region' columns, since
 # you'll be investigating as if this were a single location wholesaler, rather
@@ -79,7 +81,7 @@ def doKMeans(data, clusters=0):
 # KMeans to examine and give weight to them.
 #
 # .. your code here ..
-
+df.drop(df[['Channel','Region' ]], axis=1, inplace=True)
 
 #
 # TODO: Before unitizing / standardizing / normalizing your data in preparation for
@@ -87,8 +89,8 @@ def doKMeans(data, clusters=0):
 # .describe() method, or even by using the built-in pandas df.plot.hist()
 #
 # .. your code here ..
-
-
+#df.describe()
+#df.plot.hist()
 #
 # INFO: Having checked out your data, you may have noticed there's a pretty big gap
 # between the top customers in each feature category and the rest. Some feature
@@ -111,6 +113,7 @@ for col in df.columns:
   sort = df.sort_values(by=col, ascending=False)
   if len(sort) > 5: sort=sort[:5]
   for index in sort.index: drop[index] = True # Just store the index once
+
 
 #
 # INFO Drop rows by index. We do this all at once in case there is a
@@ -192,14 +195,14 @@ T = df # No Change
 # Do KMeans
 n_clusters = 3
 centroids, labels = doKMeans(T, n_clusters)
-
+print centroids
 
 #
 # TODO: Print out your centroids. They're currently in feature-space, which
 # is good. Print them out before you transform them into PCA space for viewing
 #
 # .. your code here ..
-
+#plt.scatter(centroids[0], centroids[1], label='Centroids')
 
 # Do PCA *after* to visualize the results. Project the centroids as well as 
 # the samples into the new 2D feature space for visualization purposes.

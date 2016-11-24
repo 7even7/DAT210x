@@ -2,6 +2,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import Normalizer
+from sklearn.decomposition import PCA
+from sklearn.neighbors import KNeighborsClassifier
+
+
+
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -52,14 +59,17 @@ def plotDecisionBoundary(model, X, y):
 # loading your data properly--don't fail on the 1st step!
 #
 # .. your code here ..
-
-
+X = pd.read_csv('C:\Data\Projektit\DAT210x\Module5\Datasets\Wheat.data', index_col=0)
 
 #
 # TODO: Copy the 'wheat_type' series slice out of X, and into a series
 # called 'y'. Then drop the original 'wheat_type' column from the X
 #
-# .. your code here ..
+y=X['wheat_type']
+
+X_with_dummies=pd.get_dummies(X['wheat_type'])
+
+X.drop('wheat_type', axis=1, inplace=True)
 
 
 
@@ -67,6 +77,8 @@ def plotDecisionBoundary(model, X, y):
 # classification isn't ordinal, but just as an experiment...
 #
 # .. your code here ..
+y_ordinal= y.astype("category",
+                    ordered=True).cat.codes
 
 
 
@@ -75,8 +87,8 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
-
+X.fillna(X.mean(), inplace=True)
+X_with_dummies.fillna(X.mean(), inplace=True)
 #
 # TODO: Split X into training and testing data sets using train_test_split().
 # INFO: Use 0.33 test size, and use random_state=1. This is important
@@ -85,8 +97,9 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
-
+# X_train, Y_train  = train_test_split(X, test_size=0.33, random_state=1)
+trainingData, testData, trainingLabels, testLabels = train_test_split(X, y_ordinal, test_size=0.33, random_state=1)
+trainingData_withDummies, testData_withDummies, trainingLabels_withDummies, testLabels_withDummies = train_test_split(X_with_dummies, y_ordinal, test_size=0.33, random_state=1)
 # 
 # TODO: Create an instance of SKLearn's Normalizer class and then train it
 # using its .fit() method against your *training* data.
@@ -98,8 +111,8 @@ def plotDecisionBoundary(model, X, y):
 # apply your models to.
 #
 # .. your code here ..
-
-
+SKNormalizer = Normalizer().fit(trainingData)
+SKNormalizer_withDummies = Normalizer().fit(trainingData_withDummies)
 
 #
 # TODO: With your trained pre-processor, transform both your training AND
@@ -111,7 +124,11 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+normalizedTrainingData = SKNormalizer.transform(trainingData)
+normalizedTestingData = SKNormalizer.transform(testData)
 
+normalizedTrainingData_withDummies = SKNormalizer.transform(trainingData_withDummies)
+normalizedTestingData_withDummies = SKNormalizer.transform(testData_withDummies)
 
 
 #
@@ -124,9 +141,9 @@ def plotDecisionBoundary(model, X, y):
 # boundary in 2D would be if your KNN algo ran in 2D as well:
 #
 # .. your code here ..
-
-
-
+pca_model = PCA(n_components=2).fit(normalizedTrainingData)
+d_testingData = pca_model.transform(normalizedTestingData)
+d_trainingData = pca_model.transform(normalizedTrainingData)
 
 #
 # TODO: Create and train a KNeighborsClassifier. Start with K=9 neighbors.
@@ -136,11 +153,16 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
+lkm=2
+knn = KNeighborsClassifier(n_neighbors=lkm).fit(d_trainingData, trainingLabels)
+kn_all = KNeighborsClassifier(n_neighbors=lkm).fit(normalizedTrainingData, trainingLabels)
+kn_all_withDummies = KNeighborsClassifier(n_neighbors=lkm).fit(normalizedTrainingData_withDummies, trainingLabels_withDummies)
 
 
 # HINT: Ensure your KNeighbors classifier object from earlier is called 'knn'
-plotDecisionBoundary(knn, X_train, y_train)
+
+plotDecisionBoundary(knn, d_trainingData, trainingLabels)
+
 
 
 #------------------------------------
@@ -154,6 +176,9 @@ plotDecisionBoundary(knn, X_train, y_train)
 # .. your code here ..
 
 
+print "PCA-redusoitu malli: K-arvolla: " +str(lkm)+ " tulokseksi saatiin arvo: " + str(knn.score(d_testingData, testLabels))
+print "Kaikki featuret huomioiva malli: K-arvolla: " +str(lkm)+ " tulokseksi saatiin arvo: " + str(kn_all.score(normalizedTestingData, testLabels))
+print "Kaikki featuret huomioiva malli _withDummies: K-arvolla: " +str(lkm)+ " tulokseksi saatiin arvo: " + str(kn_all_withDummies.score(normalizedTestingData_withDummies, testLabels_withDummies))
 
 #
 # BONUS: Instead of the ordinal conversion, try and get this assignment
