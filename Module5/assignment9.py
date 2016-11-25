@@ -84,7 +84,7 @@ def drawPlane(model, X_test, y_test, title, R2):
 # called X:
 #
 # .. your code here ..
-
+X = pd.read_csv('C:\Data\Projektit\DAT210x\Module5\Datasets\College.csv', index_col=0)
 
 #
 # INFO: This line isn't necessary for your purposes; but we'd just
@@ -94,6 +94,7 @@ def drawPlane(model, X_test, y_test, title, R2):
 # If you decide to embark on the "Data Scientist Challenge", this
 # line of code will save you the trouble of converting it through
 # other means:
+
 X.Private = X.Private.map({'Yes':1, 'No':0})
 
 
@@ -128,7 +129,8 @@ X.Private = X.Private.map({'Yes':1, 'No':0})
 # .. your code here ..
 
 # INFO: We'll take it from here, buddy:
-drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
+
+#drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
 
 
 
@@ -139,7 +141,8 @@ drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
 # per college.
 #
 # .. your code here ..
-drawLine(model, X_test, y_test, "Accept(Enroll)", score)
+
+#drawLine(model, X_test, y_test, "Accept(Enroll)", score)
 
 
 
@@ -149,7 +152,9 @@ drawLine(model, X_test, y_test, "Accept(Enroll)", score)
 # students per college.
 #
 # .. your code here ..
-drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
+#
+
+# drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
 
 
 #
@@ -165,7 +170,8 @@ drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
 # inputs. Your training labels will remain a single slice.
 #
 # .. your code here ..
-drawPlane(model, X_test, y_test, "Accept(Room&Board,Enroll)", score)
+
+#drawPlane(model, X_test, y_test, "Accept(Room&Board,Enroll)", score)
 
 
 #

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -34,7 +35,7 @@ def drawLine(model, X_test, y_test, title):
 # spread sheet application
 #
 # .. your code here ..
-
+X = pd.read_csv('C:\Data\Projektit\DAT210x\Module5\Datasets\life_expectancy.csv',  sep='\s+')
 
 #
 # TODO: Create your linear regression model here and store it in a
@@ -43,7 +44,7 @@ def drawLine(model, X_test, y_test, title):
 #
 # .. your code here ..
 
-
+model = LinearRegression()
 
 #
 # TODO: Slice out your data manually (e.g. don't use train_test_split,
@@ -54,7 +55,8 @@ def drawLine(model, X_test, y_test, title):
 # of this document before proceeding.
 #
 # .. your code here ..
-
+X_train = X[X['Year']<1986][['Year']]
+y_train = X[X['Year']<1986][['WhiteMale']]
 
 
 #
@@ -66,14 +68,15 @@ def drawLine(model, X_test, y_test, title):
 # 2030 and 2045 extrapolation.
 #
 # .. your code here ..
-
+WhiteMale = model.fit(X_train, y_train)
+drawLine(WhiteMale, X_train, y_train, "WhiteMale")
 
 #
 # TODO: Print the actual 2014 WhiteMale life expectancy from your
 # loaded dataset
 #
 # .. your code here ..
-
+print X[X['Year']==2014][['WhiteMale']]
 
 
 # 
@@ -83,8 +86,10 @@ def drawLine(model, X_test, y_test, title):
 # BlackFemale life expectancy
 #
 # .. your code here ..
-
-
+X_train = X[X['Year']<1986][['Year']]
+y_train = X[X['Year']<1986][['BlackFemale']]
+BlackFemale = model.fit(X_train, y_train)
+drawLine(BlackFemale, X_train, y_train, "BlackFemale")
 
 #
 # TODO: Lastly, print out a correlation matrix for your entire
@@ -93,10 +98,14 @@ def drawLine(model, X_test, y_test, title):
 # the course
 #
 # .. your code here ..
+X.set_index('Year', inplace=True)
 
+plt.imshow(X.corr(), cmap=plt.cm.Blues, interpolation='nearest')
+tick_marks = [i for i in range(len(X.columns))]
+plt.xticks(tick_marks, X.columns, rotation='vertical')
+plt.yticks(tick_marks, X.columns)
+plt.colorbar()
 plt.show()
-
-
 
 
 #
